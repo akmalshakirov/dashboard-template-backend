@@ -24,19 +24,30 @@ exports.loginController = async (req, res) => {
             });
         }
 
-        const existAdmin = ADMINS.find(
-            (a) => a.username === username && a.password === password
-        );
-
+        const existAdmin = ADMINS.find((a) => a.username === username);
         if (!existAdmin) {
-            return res.status(400).json({
+            return res.status(404).json({
                 error: "No user found!",
             });
         }
 
-        return res
-            .status(200)
-            .json({ message: "You're logined successfully!" });
+        const matchedAdmin = ADMINS.find(
+            (a) => existAdmin && a.password === password
+        );
+        if (!matchedAdmin) {
+            return res.status(400).json({
+                error: "Incorrect password!",
+            });
+        }
+
+        const token = Math.random().toString(32);
+
+        setTimeout(() => {
+            return res.status(200).json({
+                message: "You just logined successfully!",
+                token: token,
+            });
+        }, 1111);
     } catch (error) {
         console.log(error);
     }

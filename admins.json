@@ -2,11 +2,13 @@
     "admins": {
         "admin": {
             "username": "admin",
-            "password": "admin"
+            "password": "admin",
+            "role": "ADMIN"
         },
         "akmal": {
             "username": "awd",
-            "password": "super@admin"
+            "password": "super@admin",
+            "role": "SUPERADMIN"
         }
     }
 }
