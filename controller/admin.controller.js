@@ -22,6 +22,42 @@ let ADMINS = [
     },
 ];
 
+exports.createAdmin = (req, res) => {
+    try {
+        const { name, username, role, password } = req.body;
+        if (!name || !username || !role || !password) {
+            return res.status(400).json({
+                error: "All fields required!",
+            });
+        }
+
+        const existUsername = ADMINS.find((a) => a.username === username);
+
+        if (existUsername) {
+            return res.status(400).json({
+                error: "This username already taken!",
+            });
+        }
+
+        ADMINS.push({
+            id: ADMINS.length + 1,
+            name: name,
+            username: username,
+            password: password,
+            role: role,
+        });
+
+        setTimeout(() => {
+            return res.status(201).json({
+                message: "Admin created successfully!",
+                admins: ADMINS,
+            });
+        }, 1111);
+    } catch (error) {
+        console.log(error);
+    }
+};
+
 exports.getAdmins = (req, res) => {
     try {
         if (ADMINS.length === 0) {
@@ -93,9 +129,11 @@ exports.updateAdmin = async (req, res) => {
 
         console.log(admin, "updated ADMIN FJIOFJJFRIJ \n\n\n\n\n");
 
-        return res.status(200).json({
-            message: "Admin updated successfully!",
-        });
+        setTimeout(() => {
+            return res.status(200).json({
+                message: "Admin updated successfully!",
+            });
+        }, 1111);
     } catch (error) {
         console.log(error);
     }
