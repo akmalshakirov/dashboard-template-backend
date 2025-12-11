@@ -1,4 +1,4 @@
-let ADMINS = [
+const ADMINS = [
     {
         id: 1,
         username: "admin",
@@ -35,7 +35,7 @@ exports.createAdmin = (req, res) => {
 
         if (existUsername) {
             return res.status(400).json({
-                error: "This username already taken!",
+                error: "This username is already taken!",
             });
         }
 
@@ -80,7 +80,7 @@ exports.getOneAdmin = (req, res) => {
     try {
         const { id } = req.params;
 
-        if (typeof id !== "string" || isNaN(id)) {
+        if (typeof id !== "string") {
             return res.status(400).json({
                 error: "Id is invalid!",
             });
@@ -114,7 +114,7 @@ exports.updateAdmin = async (req, res) => {
         const { id } = req.params;
         console.log(id, "id \n\n\n\n\n");
 
-        if (typeof id !== "string" || isNaN(id)) {
+        if (typeof id !== "string") {
             return res.status(400).json({
                 error: "Id is invalid!",
             });
@@ -132,6 +132,38 @@ exports.updateAdmin = async (req, res) => {
         setTimeout(() => {
             return res.status(200).json({
                 message: "Admin updated successfully!",
+            });
+        }, 1111);
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+exports.deleteAdmin = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (typeof id !== "string") {
+            return res.status(400).json({
+                error: "Id is invalid!",
+            });
+        }
+
+        const admin = ADMINS.find((a) => a.id == id);
+
+        if (!admin) {
+            return res.status(404).json({
+                error: "Admin not found!",
+            });
+        }
+
+        ADMINS.splice([id], 1);
+
+        console.log(admin.id, "deleted admin");
+
+        setTimeout(() => {
+            return res.status(200).json({
+                message: "Admin deleted successfully!",
             });
         }, 1111);
     } catch (error) {
