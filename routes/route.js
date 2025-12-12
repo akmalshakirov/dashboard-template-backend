@@ -9,7 +9,7 @@ const {
 const { loginController } = require("../controller/login.controller");
 
 router
-    .get("/admins", getAdmins)
+    // .get("/admins", getAdmins)
     .post("/create-admin", createAdmin)
     .delete("/delete-admin/:id", deleteAdmin)
     .get("/admin/:id", getOneAdmin)

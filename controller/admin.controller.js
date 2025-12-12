@@ -1,37 +1,32 @@
-const ADMINS = [
-    {
-        id: 1,
-        username: "admin",
-        password: "admin",
-        role: "ADMIN",
-        name: "admin",
-    },
-    {
-        id: 2,
-        username: "awd",
-        password: "superadmin",
-        role: "SUPERADMIN",
-        name: "Hasker",
-    },
-    {
-        id: 3,
-        username: "test",
-        password: "test12",
-        role: "ADMIN",
-        name: "test",
-    },
-];
+const { adminModel } = require("../models/admins.model");
+const { adminCreateSchema } = require("../validator/admin.validator");
+const { hash } = require("bcrypt");
 
-exports.createAdmin = (req, res) => {
+exports.createAdmin = async (req, res) => {
     try {
-        const { name, username, role, password } = req.body;
-        if (!name || !username || !role || !password) {
+        const { error, value } = adminCreateSchema.validate(req.body, {
+            abortEarly: false,
+        });
+
+        if (error) {
+            const notAllowedErrors = error.details.filter(
+                (d) => d.type === "object.unknown"
+            );
+
+            if (notAllowedErrors.length > 0) {
+                return res.status(400).json({
+                    error: "You've sent wrong information!",
+                });
+            }
+
             return res.status(400).json({
-                error: "All fields required!",
+                error: error.message,
             });
         }
 
-        const existUsername = ADMINS.find((a) => a.username === username);
+        const existUsername = await adminModel.findOne({
+            username: value.username,
+        });
 
         if (existUsername) {
             return res.status(400).json({
@@ -39,42 +34,41 @@ exports.createAdmin = (req, res) => {
             });
         }
 
-        ADMINS.push({
-            id: ADMINS.length + 1,
-            name: name,
-            username: username,
-            password: password,
-            role: role,
+        const hashPassword = await hash(value.password, 10);
+
+        const admin = await adminModel.create({
+            name: value.name,
+            username: value.username,
+            role: value.role,
+            password: hashPassword,
         });
 
-        setTimeout(() => {
-            return res.status(201).json({
-                message: "Admin created successfully!",
-                admins: ADMINS,
-            });
-        }, 1111);
+        return res.status(201).json({
+            message: "Admin created successfully!",
+            admin,
+        });
     } catch (error) {
         console.log(error);
     }
 };
 
-exports.getAdmins = (req, res) => {
-    try {
-        if (ADMINS.length === 0) {
-            return res.status(404).json({
-                error: "Admins not found!",
-            });
-        }
+// exports.getAdmins = (req, res) => {
+//     try {
+//         if (ADMINS.length === 0) {
+//             return res.status(404).json({
+//                 error: "Admins not found!",
+//             });
+//         }
 
-        setTimeout(() => {
-            return res.status(200).json({
-                admins: ADMINS,
-            });
-        }, 1111);
-    } catch (error) {
-        console.log(error);
-    }
-};
+//         setTimeout(() => {
+//             return res.status(200).json({
+//                 admins: ADMINS,
+//             });
+//         }, 1111);
+//     } catch (error) {
+//         console.log(error);
+//     }
+// };
 
 exports.getOneAdmin = (req, res) => {
     try {
@@ -157,7 +151,7 @@ exports.deleteAdmin = async (req, res) => {
             });
         }
 
-        ADMINS.splice([id], 1);
+        ADMINS.splice(id - 1, 1);
 
         console.log(admin.id, "deleted admin");
 
