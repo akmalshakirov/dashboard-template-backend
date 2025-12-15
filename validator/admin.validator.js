@@ -29,3 +29,29 @@ exports.adminCreateSchema = Joi.object({
         "any.only": "Role's format didn't match!",
     }),
 });
+
+exports.adminUpdateSchema = Joi.object({
+    name: Joi.string().min(5).max(10).messages({
+        "string.base": "Name isn't match to format!",
+        "string.empty": "Name must be filled!",
+        "string.min": "Minimum name's length is {#limit}!",
+        "string.max": "Maximum name's length is {#limit}!",
+    }),
+    username: Joi.string().min(5).max(10).messages({
+        "string.base": "Username isn't match to format!",
+        "string.empty": "Username must be filled!",
+        "string.min": "Minimum username's length is {#limit}!",
+        "string.max": "Maximum username's length is {#limit}!",
+    }),
+    password: Joi.string().min(5).max(15).messages({
+        "string.base": "Password isn't match to format!",
+        "string.empty": "Password must be filled!",
+        "string.min": "Minimum password's length is {#limit}!",
+        "string.max": "Maximum password's length is {#limit}!",
+    }),
+    role: Joi.string().valid("ADMIN", "SUPERADMIN").messages({
+        "string.base": "Role isn't match to format!",
+        "string.empty": "Role must be filled!",
+        "any.only": "Role's format didn't match!",
+    }),
+});

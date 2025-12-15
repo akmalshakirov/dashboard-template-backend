@@ -1,5 +1,8 @@
 const { adminModel } = require("../models/admins.model");
-const { adminCreateSchema } = require("../validator/admin.validator");
+const {
+    adminCreateSchema,
+    adminUpdateSchema,
+} = require("../validator/admin.validator");
 const { hash } = require("bcrypt");
 
 exports.createAdmin = async (req, res) => {
@@ -52,25 +55,25 @@ exports.createAdmin = async (req, res) => {
     }
 };
 
-// exports.getAdmins = (req, res) => {
-//     try {
-//         if (ADMINS.length === 0) {
-//             return res.status(404).json({
-//                 error: "Admins not found!",
-//             });
-//         }
+exports.getAdmins = async (req, res) => {
+    try {
+        const admins = await adminModel.find();
 
-//         setTimeout(() => {
-//             return res.status(200).json({
-//                 admins: ADMINS,
-//             });
-//         }, 1111);
-//     } catch (error) {
-//         console.log(error);
-//     }
-// };
+        if (admins.length === 0 || !admins) {
+            return res.status(404).json({
+                error: "Admins not found!",
+            });
+        }
 
-exports.getOneAdmin = (req, res) => {
+        return res.status(200).json({
+            admins,
+        });
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+exports.getOneAdmin = async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -80,13 +83,9 @@ exports.getOneAdmin = (req, res) => {
             });
         }
 
-        if (ADMINS.length === 0) {
-            return res.status(404).json({
-                error: "Admins not found!",
-            });
-        }
-
-        const admin = ADMINS.find((a) => a.id == id);
+        const admin = await adminModel.findById(id, {
+            password: false,
+        });
 
         if (!admin) {
             return res.status(404).json({
@@ -94,9 +93,7 @@ exports.getOneAdmin = (req, res) => {
             });
         }
 
-        setTimeout(() => {
-            return res.status(200).json({ admin });
-        }, 1111);
+        return res.status(200).json({ admin });
     } catch (error) {
         console.log(error);
     }
@@ -106,7 +103,6 @@ exports.updateAdmin = async (req, res) => {
     try {
         const body = req.body;
         const { id } = req.params;
-        console.log(id, "id \n\n\n\n\n");
 
         if (typeof id !== "string") {
             return res.status(400).json({
@@ -114,20 +110,49 @@ exports.updateAdmin = async (req, res) => {
             });
         }
 
-        const admin = ADMINS.find((a) => a.id == id);
+        const admin = await adminModel.findById(id);
 
-        admin.username = await body.username;
-        admin.name = await body.name;
-        admin.password = await body.password;
-        admin.role = await body.role;
-
-        console.log(admin, "updated ADMIN FJIOFJJFRIJ \n\n\n\n\n");
-
-        setTimeout(() => {
-            return res.status(200).json({
-                message: "Admin updated successfully!",
+        if (!admin) {
+            return res.status(404).json({
+                error: "Admin not found!",
             });
-        }, 1111);
+        }
+
+        const { error, value } = adminUpdateSchema.validate(body, {
+            abortEarly: false,
+        });
+
+        if (error) {
+            const notAllowedErrors = error.details.filter(
+                (d) => d.type === "object.unknown"
+            );
+
+            if (notAllowedErrors.length > 0) {
+                return res.status(400).json({
+                    error: "You've sent wrong information!",
+                });
+            }
+
+            return res.status(400).json({
+                error: error.message,
+            });
+        }
+
+        let updatedAdmin = {
+            name: value.name,
+            username: value.username,
+            role: value.role,
+        };
+
+        if (value.password) {
+            updatedAdmin.password = await hash(value.password, 10);
+        }
+
+        await adminModel.findByIdAndUpdate(id, updatedAdmin);
+
+        return res.status(200).json({
+            message: "Admin updated successfully!",
+        });
     } catch (error) {
         console.log(error);
     }
@@ -143,7 +168,7 @@ exports.deleteAdmin = async (req, res) => {
             });
         }
 
-        const admin = ADMINS.find((a) => a.id == id);
+        const admin = await adminModel.findById(id);
 
         if (!admin) {
             return res.status(404).json({
@@ -151,15 +176,11 @@ exports.deleteAdmin = async (req, res) => {
             });
         }
 
-        ADMINS.splice(id - 1, 1);
+        await adminModel.findByIdAndDelete(id);
 
-        console.log(admin.id, "deleted admin");
-
-        setTimeout(() => {
-            return res.status(200).json({
-                message: "Admin deleted successfully!",
-            });
-        }, 1111);
+        return res.status(200).json({
+            message: "Admin deleted successfully!",
+        });
     } catch (error) {
         console.log(error);
     }
