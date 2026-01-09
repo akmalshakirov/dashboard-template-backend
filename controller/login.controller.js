@@ -52,3 +52,36 @@ exports.loginController = async (req, res) => {
         console.log(error);
     }
 };
+
+exports.searchDomain = (req, res) => {
+    try {
+        const { body } = req;
+        const { domain, domainZone, price } = body;
+
+        if (!body)
+            return res.status(400).json({
+                error: "Body wasn't found!",
+            });
+
+        if (!domain || !domainZone) {
+            return res.status(400).json({
+                error: "domain and domainZone are required fields!",
+            });
+        }
+
+        const newDomain = {
+            name: domain,
+            domainZone: domainZone,
+            price: Math.floor(Math.random() * 100000),
+        };
+
+        setTimeout(() => {
+            return res.status(200).json({
+                message: `Domain name not found: ${domain}`,
+                newDomain,
+            });
+        }, 4444);
+    } catch (error) {
+        console.log(error);
+    }
+};

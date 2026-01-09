@@ -6,7 +6,10 @@ const {
     createAdmin,
     deleteAdmin,
 } = require("../controller/admin.controller");
-const { loginController } = require("../controller/login.controller");
+const {
+    loginController,
+    searchDomain,
+} = require("../controller/login.controller");
 
 router
     .get("/admins", getAdmins)
@@ -14,6 +17,7 @@ router
     .delete("/delete-admin/:id", deleteAdmin)
     .get("/admin/:id", getOneAdmin)
     .put("/admin/:id", updateAdmin)
-    .post("/login", loginController);
+    .post("/login", loginController)
+    .post("/domain", searchDomain);
 
 module.exports = router;
